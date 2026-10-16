@@ -14,7 +14,6 @@ func main() {
 	http.HandleFunc("GET /static/{file}", s.staticHandler)
 	http.HandleFunc("GET /stir", s.stirHandler)
 	http.HandleFunc("POST /stir", s.stirHandler)
-	http.HandleFunc("GET /changelog", s.changelogHandler)
 	http.HandleFunc("GET /feeds", s.settingsHandler)
 	http.HandleFunc("POST /feeds/submit", s.settingsSubmitHandler)
 	http.HandleFunc("GET /login", s.loginHandler)

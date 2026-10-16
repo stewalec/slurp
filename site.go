@@ -90,10 +90,6 @@ func (s *Site) indexHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "index", nil)
 }
 
-func (s *Site) discoverHandler(w http.ResponseWriter, r *http.Request) {
-	s.renderPage(w, r, "discover", nil)
-}
-
 func (s *Site) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		if s.loggedIn(r) {
@@ -644,6 +640,3 @@ func (s *Site) readHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, decodedURL, http.StatusSeeOther)
 }
 
-func (s *Site) changelogHandler(w http.ResponseWriter, r *http.Request) {
-	s.renderPage(w, r, "changelog", nil)
-}

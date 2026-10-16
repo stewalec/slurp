@@ -2,7 +2,8 @@
 {{ template "head" . }}
 {{ template "nav" . }}
 
-{{ $length := len .Data.Items }} {{ if eq $length 0 }}
+{{ $length := len .Data.Items }}
+{{ if eq $length 0 }}
 {{ if .LoggedIn }}
 <p>
 You don't seem to have any feeds yet.
@@ -10,16 +11,27 @@ You don't seem to have any feeds yet.
 Go to <a href="/feeds">/feeds</a> to add your first feed!
 </p>
 {{ end }}
+{{ else }}
+{{ if .LoggedIn }}
+<fieldset style="margin-top: 2rem;">
+  <legend>Show Items</legend>
+  <input type="radio" name="filter" id="f-all" class="filter">
+  <label for="f-all">All</label>
+  <input type="radio" name="filter" id="f-read" class="filter">
+  <label for="f-read">Read</label>
+  <input type="radio" name="filter" id="f-unread" class="filter" checked>
+  <label for="f-unread">Unread</label>
+</fieldset>
 {{ end }}
-<ul>
+<ul class="items">
 {{ range .Data.Items }}
 	<li{{ if and $.LoggedIn (index $.Data.ReadItems .Link) }} class="read"{{ end }}>
 	<a href="{{ if $.LoggedIn }}/read/{{ .Link | escapeURL }}{{ else }}{{ .Link }}{{ end }}">
 		{{ .Link | faviconForURL }}{{ if .Title }} {{ .Title }} {{ else }} (empty title) {{ end }}
 	</a>
 	<br>
-	<span class="puny" title="{{ .Date }}">
-		Published {{ .Date | timeSince }} via
+	<span class="puny">
+		Published <span title="{{ .Date }}">{{ .Date | timeSince }}</span> via
 		<a href="//{{ .Link | printDomain }}">
 			{{ .Link | printDomain }}</a>
 		{{ if $.LoggedIn }}
@@ -38,6 +50,10 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 	</li>
 {{ end }}
 </ul>
+<p class="puny empty" style="text-align: center;">
+No items
+</p>
+{{ end }}
 
 {{ if $.LoggedIn }}
 <script>

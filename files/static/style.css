@@ -69,6 +69,37 @@ nav .right {
   display: inline-flex;
 }
 
+/* Show only read items */
+body:has(#f-read:checked) li:not(.read) {
+  display: none;
+}
+
+/* Show only unread items */
+body:has(#f-unread:checked) li.read {
+  display: none;
+}
+
+.filter:checked + label {
+  font-weight: bold;
+}
+
+.filter:focus-visible + label {
+  outline: 2px solid currentColor;
+}
+
+.empty {
+  display: none;
+}
+
+/* Unread filter, but no unread items */
+body:has(#f-unread:checked):not(:has(.items li:not(.read))) .empty,
+/* Read filter, but no read items */
+body:has(#f-read:checked):not(:has(.items li.read)) .empty,
+/* All filter, but no items */
+body:has(#f-all:checked):not(:has(.items li)) .empty {
+  display: block;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #1c1c1c;
