@@ -1,23 +1,26 @@
 {{ define "nav" }}
 <nav>
 	<h2>
-		<a href="/">
-			vore.website
+		<a href="/" class="logo">
+			SL
+			<span>
+				<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+					<path d="M0 0h24v24H0z" fill="none" />
+					<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.5">
+						<path d="M7.08 17.576c-1.312-.718-3.156-2.126-3.86-4.573c-.232-.805-.348-1.207-.046-1.605S3.975 11 4.973 11h14.038c.998 0 1.497 0 1.8.398c.301.398.186.8-.046 1.605c-.704 2.446-2.548 3.854-3.86 4.572l-.153.084c-.436.256-.6.677-.45 1.158l.038.11c.026.076.04.114.049.144a1.502 1.502 0 0 1-1.385 1.928L14.85 21h-5.7c-.09 0-.134 0-.168-.002a1.5 1.5 0 0 1-1.384-1.913l.053-.159l.038-.115c.145-.477-.018-.893-.45-1.148z" />
+						<path stroke-linecap="round" d="m11.492 3l.5.5a1.414 1.414 0 0 1 0 2a1.414 1.414 0 0 0 0 2l.5.5m-6-5l.5.5a1.414 1.414 0 0 1 0 2a1.414 1.414 0 0 0 0 2l.5.5m8.5 3l3-6" />
+					</g>
+				</svg>
+			</span>
+			RP
 		</a>
 	</h2>
-<!--
-	<div class="changelog-marquee">
-		<marquee><a href="/changelog">✨ NEW: purple read tracking! settings→feeds! saves→archive! click for details ✨</a></marquee>
-	</div>
--->
 	{{ if .LoggedIn }}
-	<a {{ if eq .Title "user" }}style="font-weight: bold;"{{ end }} href="/{{ .Username }}">home</a>
-	| <a {{ if eq .Title "archive" }}style="font-weight: bold;"{{ end }} href="/archive">archive</a>
-	| <a {{ if eq .Title "finger" }}style="font-weight: bold;"{{ end }} href="/finger">finger</a>
-	| <a {{ if eq .Title "feeds" }}style="font-weight: bold;"{{ end }} href="/feeds">feeds</a>
-	| <a href="/logout">logout</a>
-	{{ else }}
-	<a {{ if eq .Title "login" }}style="font-weight: bold;"{{ end }}href="/login">login/register</a>
+	<a {{ if eq .Title "user" }}style="font-weight: bold;"{{ end }} href="/{{ .Username }}">HOME</a>
+	| <a {{ if eq .Title "archive" }}style="font-weight: bold;"{{ end }} href="/archive">ARCHIVE</a>
+	| <a {{ if eq .Title "stir" }}style="font-weight: bold;"{{ end }} href="/stir">STIR</a>
+	| <a {{ if eq .Title "feeds" }}style="font-weight: bold;"{{ end }} href="/feeds">FEEDS</a>
+	| <a href="/logout">LOGOUT</a>
 	{{ end }}
 </nav>
 {{ end }}

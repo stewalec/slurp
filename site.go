@@ -7,7 +7,6 @@ import (
 	"html"
 	"html/template"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -318,9 +317,9 @@ func (s *Site) feedDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "feedDetails", feedData)
 }
 
-func (s *Site) fingerHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) stirHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		s.renderPage(w, r, "finger", nil)
+		s.renderPage(w, r, "stir", nil)
 	}
 	if r.Method == "POST" {
 		targetURL := r.FormValue("url")
@@ -518,10 +517,9 @@ func (s *Site) renderPage(w http.ResponseWriter, r *http.Request, page string, d
 		CutePhrase string
 		Data       any
 	}{
-		Title:      page,
+		Title:      "Slurp - " + page,
 		Username:   s.username(r),
 		LoggedIn:   s.loggedIn(r),
-		CutePhrase: s.randomCutePhrase(),
 		Data:       data,
 	}
 
@@ -648,21 +646,4 @@ func (s *Site) readHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Site) changelogHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "changelog", nil)
-}
-
-func (s *Site) randomCutePhrase() string {
-	phrases := []string{
-		"nom nom posts (๑ᵔ⤙ᵔ๑)",
-		"^(;,;)^ vawr",
-		"( -_•)╦̵̵̿╤─ - - - vore",
-		"devouring feeds since 2023",
-		"tfw new rss post (⊙ _ ⊙ )",
-		"( ˘͈ ᵕ ˘͈♡) <3",
-		"voreposting",
-		"vore dot website",
-		"a no-bullshit feed reader",
-		"*chomp* good feeds",
-	}
-	i := rand.Intn(len(phrases))
-	return phrases[i]
 }

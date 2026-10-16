@@ -5,9 +5,9 @@
 {{ $length := len .Data.Items }} {{ if eq $length 0 }}
 {{ if .LoggedIn }}
 <p>
-you don't seem to have any feeds yet.
+You don't seem to have any feeds yet.
 
-go to <a href="/feeds">/feeds</a> to add your first feed!
+Go to <a href="/feeds">/feeds</a> to add your first feed!
 </p>
 {{ end }}
 {{ end }}
@@ -18,16 +18,21 @@ go to <a href="/feeds">/feeds</a> to add your first feed!
 		{{ .Link | faviconForURL }}{{ if .Title }} {{ .Title }} {{ else }} (empty title) {{ end }}
 	</a>
 	<br>
-	<span class=puny title="{{ .Date }}">
-		published {{ .Date | timeSince }} via
+	<span class="puny" title="{{ .Date }}">
+		Published {{ .Date | timeSince }} via
 		<a href="//{{ .Link | printDomain }}">
 			{{ .Link | printDomain }}</a>
 		{{ if $.LoggedIn }}
-		| <a href="#"
-			data-save-url="/save/{{ .Link | escapeURL }}"
-			onclick="saveItem(this); return false;">
-			archive
-		</a>
+		| <details style="cursor: pointer; display: inline;">
+        <summary style="display: inline;">MORE</summary>
+        <a href="#"
+          data-save-url="/save/{{ .Link | escapeURL }}"
+          onclick="saveItem(this); return false;">
+          ARCHIVE</a>
+        | <a href="#">MARK AS READ</a>
+        | <a href="#">REPLY</a>
+        | <a href="#">SHARE</a>
+      </details>
 		{{ end }}
 	</span>
 	</li>
@@ -42,7 +47,7 @@ function saveItem(element) {
   let index = 0;
 
   const intervalId = setInterval(() => {
-    element.textContent = "archiving" + states[index];
+    element.textContent = "ARCHIVING" + states[index];
     index = (index + 1) % states.length;
   }, 300);
 
@@ -55,12 +60,12 @@ function saveItem(element) {
     })
     .then(data => {
       clearInterval(intervalId);
-      element.textContent = "archived!";
+      element.textContent = "✓ ARCHIVED!";
     })
     .catch(error => {
       console.error(error);
       clearInterval(intervalId);
-      element.textContent = "error!";
+      element.textContent = "⚠ ERROR!";
     });
 }
 </script>

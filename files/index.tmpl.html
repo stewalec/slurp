@@ -1,67 +1,20 @@
 {{ define "index" }}
 {{ template "head" . }}
 {{ template "nav" . }}
-<p>
-vore.website is a minimal web-based rss/atom feed reader.
-
-- subscribe to feeds
-- view posts chronologically
-- save stuff that interests you
-
-no unread indicators, no choresome tagging system - no bullshit.
-
-vore.website is free for anyone to use,
-  and will never be turned into a vehicle for profit.
-
-<3  <a href="https://j3s.sh">j3s</a>
-
-
-              ===CHANGELOG===
-
-2025-02
-
-- archive.is -> archive.org
-- make save async
-- replace "discover" with "finger"
-
-2024-04-29
-
-i have save support & reworked the UI a little
-
-vore "saves" work like so:
-  - you click save
-  - the post title + link are saved to db
-  - the post is archived via archive.is
-  - the archive link is saved to the db
-
-this way, anything that you save _should_ be
-available basically indefinitely.
-
-i wanted a way to save nice posts & prevent link
-rot - the vore save feature is a convenient way
-to do that.
-
-
-2024-04-20
-
-forest prompted me to dig into why vore's performance
-was so shitty - i dug in & uncovered an infinite loop
-bug in the rss library i was using! the bug has been
-reported & squashed
-
-everything should be fast again!
-
-
-2024-01-21
-
-hey ya'll, sorry for that outage!
-i was on vacation & when i got back,
-work was on fire. this is the first
-actually free moment i've had for awhile.
-
-i'm so happy that so many of you use
-this website, i feel very grateful for
-your presence.
+<p style="text-align: center;">
+<a href="https://github.com/stewalec/slurp">Slurp</a> is a minimal, web-based RSS/Atom feed reader
 </p>
+<form method="POST" action="/login">
+	<fieldset>
+		<legend>LOGIN</legend>
+		<label for="username">Username:</label>
+		<input type="text" name="username" size="42" required>
+		<br>
+		<label for="password">Password:</label>
+		<input type="password" name="password" size="42" required>
+		<br>
+		<button type="submit">Login</button>
+	</fieldset>
+</form>
 {{ template "tail" . }}
 {{ end }}

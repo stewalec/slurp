@@ -2,57 +2,26 @@
 {{ template "head" . }}
 {{ template "nav" . }}
 <h3>Feeds</h3>
-<p>your public homepage: <a href="/{{ .Username }}">vore.website/{{ .Username }}</a>
 
-subscribed to {{ len .Data }} feeds:
-</p>
 <form method="POST" action="/feeds/submit">
-<textarea name="submit" rows="10" cols="50">
+<fieldset>
+<legend>Subscribed to <b>{{ len .Data }}</b> feeds</legend>
+<textarea name="submit" rows="10" cols="57">
 {{ range .Data -}}
 {{ .UpdateURL }}
 {{ end -}}
 </textarea>
 <br>
-<input type="submit" value="subscribe">
+<button type="submit">Subscribe</button>
+</fieldset>
 </form>
 {{ $length := len .Data }}
-{{ if eq $length 0 }}
-<p>
-      ‼️ tutorial ‼️
-
-once you have subscribed to some feeds,
-their posts will appear chronologically
-on your homepage.
-
-note that vore homepages are public ‼️
-
-here are some feed urls to play with
-copy them into the text box above
-and press [subscribe]
-
-https://100r.co/links/rss.xml
-https://begriffs.com/atom.xml
-https://blog.frog.equipment/feed/
-https://capsul.bearblog.dev/rss.xml
-https://facklambda.dev/atom.xml
-https://herman.bearblog.dev/feed/
-https://j3s.sh/feed.atom
-https://katherine.cox-buday.com/rss.xml
-https://sequentialread.com/rss
-
-
-
-  /)/)
-( . .)
-( づ♡
-</p>
-{{ else if gt $length 0 }}
-<p>feed details 👁️👄👁️</p>
-{{ end }}
+{{ if gt $length 0 }}
 <p>
 {{ range .Data -}}
 <a href="/feeds/{{ .UpdateURL | escapeURL }}">{{ .UpdateURL }}</a>
 {{ end -}}
 </p>
+{{ end }}
 {{ template "tail" . }}
 {{ end }}

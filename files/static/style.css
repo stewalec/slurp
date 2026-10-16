@@ -51,35 +51,6 @@ nav a {
   color: #000;
 }
 
-.changelog-marquee {
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-  background-color: #ffff99;
-  border: 1px dashed #ff6600;
-  padding: 0.2rem;
-}
-
-.changelog-marquee a {
-  color: #ff6600;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.changelog-marquee a:hover {
-  background-color: #ff6600;
-  color: #ffff99;
-}
-
-.changelog-entry {
-  margin-bottom: 1.5rem;
-}
-
-.changelog-entry h4 {
-  margin-bottom: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
 nav .left {
 	float: left;
 }
@@ -92,6 +63,10 @@ nav .right {
   padding-top: 0px;
   color: grey;
   font-size: 0.75rem;
+}
+
+.logo {
+  display: inline-flex;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -131,23 +106,5 @@ nav .right {
 
   ul li.read a:visited {
     color: #B894D1;
-  }
-
-  .changelog-marquee {
-    background-color: #444;
-    border-color: #ff9900;
-  }
-
-  .changelog-marquee a {
-    color: #ff9900;
-  }
-
-  .changelog-marquee a:hover {
-    background-color: #ff9900;
-    color: #444;
-  }
-
-  .changelog-entry h4 {
-    color: #a0a0a0;
   }
 }

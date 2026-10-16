@@ -1,41 +1,27 @@
 {{ define "archive" }}
 {{ template "head" . }}
 {{ template "nav" . }}
+<h3>Archive</h3>
 
-{{ $length := len .Data }} {{ if eq $length 0 }}
+{{ $length := len .Data }}
+{{ if eq $length 0 }}
 {{ if .LoggedIn }}
-<p>
-you haven't archived anything yet. :(
-
-use the "archive" button to archive posts that you like!
-
-vore's archive system is unique:
-  when you click the "archive" button, vore will:
-    - submit an https://archive.org request on your behalf for the linked page
-    - store the article + archive link together
-
-this ensures that all archived articles will remain
-accessible forever!
-
-it also means that you may archive the same article
-more than once, if you'd like!
-
-currently, archived items cannot be deleted.
-</p>
+<p>No archived items.</p>
 {{ end }}
-{{ end }}
+{{ else }}
 <ul>
 {{ range .Data }}
 	<li>
 	<a href="{{ .ItemURL }}">{{ .ItemTitle }}</a>
-	<span class=puny>
+	<span class="puny">
 		(<a href="{{ .ArchiveURL }}">archived</a>)
 	</span>
 	<br>
-	<span class=puny>archived {{ .CreatedAt }} via <a href="//{{ .ItemURL | printDomain }}">{{ .ItemURL | printDomain }}</a></span>
+	<span class="puny">Archived {{ .CreatedAt }} via <a href="//{{ .ItemURL | printDomain }}">{{ .ItemURL | printDomain }}</a></span>
 	</li>
 {{ end }}
 </ul>
+{{ end }}
 
 {{ template "tail" . }}
 {{ end }}

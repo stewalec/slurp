@@ -1,0 +1,15 @@
+{{ define "stir" }}
+{{ template "head" . }}
+{{ template "nav" . }}
+<h3>Stir</h3>
+
+<p>Stir a website, see what feeds exist. No need to view source!</p>
+<form action="/stir" method="POST">
+    <fieldset>
+        <legend>URL</legend>
+        <input type="text" name="url" size="46">
+        <button type="submit">Stir</button>
+    </fieldset>
+</form>
+{{ template "tail" . }}
+{{ end }}
