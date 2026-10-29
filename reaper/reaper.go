@@ -14,6 +14,13 @@ import (
 	"git.j3s.sh/vore/sqlite"
 )
 
+type ItemDetails struct {
+	FeedName   string
+    Link       string
+	Title      string
+    Date       time.Time
+}
+
 type Reaper struct {
 	// internal list of all rss feeds where the map
 	// key represents the url of the feed (which should be unique)
@@ -181,11 +188,16 @@ func (r *Reaper) SortFeeds(f []*rss.Feed) {
 	})
 }
 
-func (r *Reaper) SortFeedItemsByDate(feeds []*rss.Feed) []*rss.Item {
-	var posts []*rss.Item
+func (r *Reaper) SortFeedItemsByDate(feeds []*rss.Feed) []*ItemDetails {
+	var posts []*ItemDetails
 	for _, f := range feeds {
 		for _, i := range f.Items {
-			posts = append(posts, i)
+			posts = append(posts, &ItemDetails{
+				FeedName: f.Title,
+				Link: i.Link,
+				Title: i.Title,
+				Date: i.Date,
+			})
 		}
 	}
 
@@ -195,8 +207,8 @@ func (r *Reaper) SortFeedItemsByDate(feeds []*rss.Feed) []*rss.Item {
 	return posts
 }
 
-func (r *Reaper) TrimFuturePosts(items []*rss.Item) []*rss.Item {
-	var posts []*rss.Item
+func (r *Reaper) TrimFuturePosts(items []*ItemDetails) []*ItemDetails {
+	var posts []*ItemDetails
 	now := time.Now()
 
 	for _, i := range items {

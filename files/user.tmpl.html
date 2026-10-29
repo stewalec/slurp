@@ -22,19 +22,13 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 	<br>
 	<span class="puny">
 		Published <span title="{{ .Date }}">{{ .Date | timeSince }}</span> via
-		<a href="//{{ .Link | printDomain }}">
-			{{ .Link | printDomain }}</a>
+		<a href="//{{ .Link | printDomain }}">{{ .FeedName }}</a>
 		{{ if $.LoggedIn }}
-		| <details style="cursor: pointer; display: inline;">
-        <summary style="display: inline;">MORE</summary>
-        <a href="#"
-          data-save-url="/save/{{ .Link | escapeURL }}"
-          onclick="saveItem(this); return false;">
-          ARCHIVE</a>
-        | <a href="#">MARK AS READ</a>
-        | <a href="#">REPLY</a>
-        | <a href="#">SHARE</a>
-      </details>
+    | <a href="#">SHARE</a>
+		| <a href="#"
+        data-save-url="/save/{{ .Link | escapeURL }}"
+        onclick="saveItem(this); return false;">
+        SAVE</a>
 		{{ end }}
 	</span>
 	</li>

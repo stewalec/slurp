@@ -198,7 +198,7 @@ func (s *Site) userHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		User      string
-		Items     []*rss.Item
+		Items     []*reaper.ItemDetails
 		ReadItems map[string]bool
 	}{
 		User:      username,
