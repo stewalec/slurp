@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -196,14 +197,27 @@ func (s *Site) userHandler(w http.ResponseWriter, r *http.Request) {
 		readItems = s.db.GetUserReadItems(s.username(r))
 	}
 
+	seen := make(map[string]bool)
+	for _, item := range items {
+		seen[item.FeedName] = true
+	}
+	
+	feeds := make([]string, 0, len(seen))
+    for name := range seen {
+        feeds = append(feeds, name)
+    }
+    slices.Sort(feeds)
+
 	data := struct {
 		User      string
 		Items     []*reaper.ItemDetails
 		ReadItems map[string]bool
+		Feeds     []string
 	}{
 		User:      username,
 		Items:     items,
 		ReadItems: readItems,
+		Feeds:     feeds,
 	}
 
 	s.renderPage(w, r, "user", data)

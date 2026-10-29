@@ -12,10 +12,18 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 </p>
 {{ end }}
 {{ else }}
+<fieldset style="margin-top:1rem;">
+  <legend>Filter by Feed</legend>
+  <select onchange="filterFeed(this.value)">
+  <option value="" selected>All</option>
+  <optgroup label="----------"></optgroup>
+  {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
+  </select>
+</fieldset>
 <ul class="items">
 {{ range .Data.Items }}
 	<li{{ if and $.LoggedIn (index $.Data.ReadItems .Link) }} class="item read"{{ else }} class="item"{{ end }}
-    {{ if $.LoggedIn }}data-read-url="/read/{{ .Link | escapeURL }}"{{ end }}>
+    {{ if $.LoggedIn }}data-read-url="/read/{{ .Link | escapeURL }}" data-feed="{{ .FeedName }}"{{ end }}>
 	<a href="{{ if $.LoggedIn }}/read/{{ .Link | escapeURL }}{{ else }}{{ .Link }}{{ end }}">
 		{{ .Link | faviconForURL }}{{ if .Title }} {{ .Title }} {{ else }} (empty title) {{ end }}
 	</a>
@@ -66,7 +74,15 @@ function saveItem(element) {
     });
 }
 
+function filterFeed(feed) {
+  document.querySelectorAll('li[data-feed]').forEach(li => {
+    li.hidden = feed !== '' && li.dataset.feed !== feed;
+  });
+  document.querySelector('.items').scrollTop = 0;
+}
+
 function markRead(element) {
+  if (element.hidden) return;
   if (element.classList.contains("read")) return;
   element.classList.add("read");
 
@@ -86,9 +102,9 @@ function markRead(element) {
 function check() {
   ticking = false;
   const items = document.querySelector(".items");
-  const navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 0;
+  const fieldsetBottom = fieldset ? Math.max(0, fieldset.getBoundingClientRect().bottom) : 0;
   const gap = parseFloat(getComputedStyle(items).marginTop) || 0;
-  const line = navBottom + gap;
+  const line = fieldsetBottom + gap;
 
   for (const element of document.querySelectorAll(".item:not(.read)")) {
     if (!element.dataset.readUrl) continue;
@@ -116,7 +132,7 @@ function onItemClick(e) {
   li.classList.add("read");
 }
 
-const nav = document.querySelector("nav");
+const fieldset = document.querySelector("fieldset");
 const seen = new WeakSet();
 let ticking = false;
 
