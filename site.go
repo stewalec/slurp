@@ -637,6 +637,9 @@ func (s *Site) readHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("error marking item read:", err)
 	}
 
-	http.Redirect(w, r, decodedURL, http.StatusSeeOther)
+	if r.Method == "GET" {
+		http.Redirect(w, r, decodedURL, http.StatusSeeOther)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
-

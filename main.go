@@ -23,6 +23,7 @@ func main() {
 	http.HandleFunc("POST /register", s.registerHandler)
 	http.HandleFunc("GET /save/{url}", s.saveHandler)
 	http.HandleFunc("GET /read/{url}", s.readHandler)
+	http.HandleFunc("POST /read/{url}", s.readHandler)
 	http.HandleFunc("GET /feeds/{url}", s.feedDetailsHandler)
 
 	// backwards compatibility redirects

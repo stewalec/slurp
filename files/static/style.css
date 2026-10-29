@@ -1,10 +1,41 @@
+html, body {
+  margin: 0 auto;
+}
+
 html {
   font-family: monospace;
   max-width: 500px;
-  margin: 20px auto;
-  /* make sure the scrollbar is always shown so
-     the width doesnt change between pages */
-  overflow-y: scroll;
+}
+
+body {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.items > li {
+  flex-shrink: 0;
+}
+
+.items::after {
+  content: "End of feed";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  flex-shrink: 0;
+  order: 1;
+  color: grey;
+  font-size: 0.75rem;
 }
 
 p {
@@ -67,37 +98,6 @@ nav .right {
 
 .logo {
   display: inline-flex;
-}
-
-/* Show only read items */
-body:has(#f-read:checked) li:not(.read) {
-  display: none;
-}
-
-/* Show only unread items */
-body:has(#f-unread:checked) li.read {
-  display: none;
-}
-
-.filter:checked + label {
-  font-weight: bold;
-}
-
-.filter:focus-visible + label {
-  outline: 2px solid currentColor;
-}
-
-.empty {
-  display: none;
-}
-
-/* Unread filter, but no unread items */
-body:has(#f-unread:checked):not(:has(.items li:not(.read))) .empty,
-/* Read filter, but no read items */
-body:has(#f-read:checked):not(:has(.items li.read)) .empty,
-/* All filter, but no items */
-body:has(#f-all:checked):not(:has(.items li)) .empty {
-  display: block;
 }
 
 @media (prefers-color-scheme: dark) {

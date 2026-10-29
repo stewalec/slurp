@@ -12,20 +12,10 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 </p>
 {{ end }}
 {{ else }}
-{{ if .LoggedIn }}
-<fieldset style="margin-top: 2rem;">
-  <legend>Show Items</legend>
-  <input type="radio" name="filter" id="f-all" class="filter">
-  <label for="f-all">All</label>
-  <input type="radio" name="filter" id="f-read" class="filter">
-  <label for="f-read">Read</label>
-  <input type="radio" name="filter" id="f-unread" class="filter" checked>
-  <label for="f-unread">Unread</label>
-</fieldset>
-{{ end }}
 <ul class="items">
 {{ range .Data.Items }}
-	<li{{ if and $.LoggedIn (index $.Data.ReadItems .Link) }} class="read"{{ end }}>
+	<li{{ if and $.LoggedIn (index $.Data.ReadItems .Link) }} class="item read"{{ else }} class="item"{{ end }}
+    {{ if $.LoggedIn }}data-read-url="/read/{{ .Link | escapeURL }}"{{ end }}>
 	<a href="{{ if $.LoggedIn }}/read/{{ .Link | escapeURL }}{{ else }}{{ .Link }}{{ end }}">
 		{{ .Link | faviconForURL }}{{ if .Title }} {{ .Title }} {{ else }} (empty title) {{ end }}
 	</a>
@@ -50,9 +40,6 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 	</li>
 {{ end }}
 </ul>
-<p class="puny empty" style="text-align: center;">
-No items
-</p>
 {{ end }}
 
 {{ if $.LoggedIn }}
@@ -84,6 +71,67 @@ function saveItem(element) {
       element.textContent = "⚠ ERROR!";
     });
 }
+
+function markRead(element) {
+  if (element.classList.contains("read")) return;
+  element.classList.add("read");
+
+  fetch(element.dataset.readUrl, {method: "POST", keepalive: true,})
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.text();
+    })
+    .catch(error => {
+      console.error(error);
+      element.classList.remove("read");
+    });
+}
+
+function check() {
+  ticking = false;
+  const items = document.querySelector(".items");
+  const navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 0;
+  const gap = parseFloat(getComputedStyle(items).marginTop) || 0;
+  const line = navBottom + gap;
+
+  for (const element of document.querySelectorAll(".item:not(.read)")) {
+    if (!element.dataset.readUrl) continue;
+    const r = element.getBoundingClientRect();
+
+    if (r.bottom > line && r.top < window.innerHeight) {
+      seen.add(element);
+    } else if (r.bottom <= line && seen.has(element)) {
+      markRead(element);
+    }
+  }
+}
+
+function schedule() {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(check);
+}
+
+function onItemClick(e) {
+  if (e.type === "auxclick" && e.button !== 1) return;
+  const a = e.target.closest(".item > a");
+  const li = a?.parentElement;
+  if (!li?.dataset.readUrl) return;
+  li.classList.add("read");
+}
+
+const nav = document.querySelector("nav");
+const seen = new WeakSet();
+let ticking = false;
+
+document.addEventListener("scroll", schedule, { capture: true, passive: true });
+window.addEventListener("resize", schedule);
+document.addEventListener("click", onItemClick);
+document.addEventListener("auxclick", onItemClick);
+
+check();
 </script>
 {{ end }}
 
