@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("POST /logout", s.logoutHandler)
 	http.HandleFunc("POST /register", s.registerHandler)
 	http.HandleFunc("GET /saved", s.userSavedHandler)
+	http.HandleFunc("DELETE /saved/{id}", s.saveHandler)
 	http.HandleFunc("POST /save/{url}", s.saveHandler)
 	http.HandleFunc("POST /archive/{id}", s.archiveHandler)
 	http.HandleFunc("GET /read/{url}", s.readHandler)

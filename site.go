@@ -146,6 +146,21 @@ func (s *Site) saveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method == "DELETE" {
+		username := s.username(r)
+		id := r.PathValue("id")
+
+		err := s.db.DeleteUserSavedItem(id, username)
+		if err != nil {
+			log.Println(err)
+			fmt.Fprintf(w, "error!!!")
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	username := s.username(r)
 	encodedURL := r.PathValue("url")
 	decodedURL, err := url.QueryUnescape(encodedURL)
@@ -200,6 +215,7 @@ func (s *Site) archiveHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "error!!!")
 		return
 	}
+
 	log.Printf("archive: %s successfully archived to %s\n", item.ItemURL, archiveURL)
 }
 

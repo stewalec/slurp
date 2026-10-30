@@ -259,6 +259,21 @@ func (db *DB) GetUserSavedItems(username string) []SavedItem {
 	return savedItems
 }
 
+func (db *DB) DeleteUserSavedItem(id string, username string) error {
+    uid := db.GetUserID(username)
+
+    _, err := db.sql.Exec(`
+        DELETE FROM saved_item
+        WHERE user_id = ? AND id = ?`,
+        uid, id,
+    )
+    if err != nil {
+        return err
+    }
+	
+    return nil
+}
+
 func (db *DB) GetUserID(username string) int {
 	var uid int
 	err := db.sql.QueryRow("SELECT id FROM user WHERE username=?", username).Scan(&uid)
