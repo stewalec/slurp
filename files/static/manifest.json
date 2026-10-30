@@ -1,6 +1,6 @@
 {
-    "name": "Slurp",
-    "short_name": "Slurp",
+    "name": "slurp",
+    "short_name": "slurp",
     "start_url": "https://slurp.emohruo.cloud",
     "display": "standalone",
     "icons": [

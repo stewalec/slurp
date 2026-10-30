@@ -16,10 +16,10 @@
 		</a>
 	</h2>
 	{{ if .LoggedIn }}
-	<a {{ if eq .Title "user" }}style="font-weight: bold;"{{ end }} href="/{{ .Username }}">HOME</a>
-	| <a {{ if eq .Title "archive" }}style="font-weight: bold;"{{ end }} href="/archive">ARCHIVE</a>
-	| <a {{ if eq .Title "stir" }}style="font-weight: bold;"{{ end }} href="/stir">STIR</a>
-	| <a {{ if eq .Title "feeds" }}style="font-weight: bold;"{{ end }} href="/feeds">FEEDS</a>
+	<a href="/{{ .Username }}">HOME</a>
+	| <a {{ if eq .Title "saved - slurp" }}style="font-weight: bold;"{{ end }} href="/saved">SAVED</a>
+	| <a {{ if eq .Title "stir - slurp" }}style="font-weight: bold;"{{ end }} href="/stir">STIR</a>
+	| <a {{ if eq .Title "feeds - slurp" }}style="font-weight: bold;"{{ end }} href="/feeds">FEEDS</a>
 	| <a href="/logout">LOGOUT</a>
 	{{ end }}
 </nav>

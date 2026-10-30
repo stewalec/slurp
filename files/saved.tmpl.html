@@ -1,0 +1,64 @@
+{{ define "saved" }}
+{{ template "head" . }}
+{{ template "nav" . }}
+<h3>Saved</h3>
+
+{{ $length := len .Data }}
+{{ if eq $length 0 }}
+{{ if .LoggedIn }}
+<p>No saved items.</p>
+{{ end }}
+{{ else }}
+<ul>
+{{ range .Data }}
+	<li>
+	<a href="{{ .ItemURL }}">{{ .ItemTitle }}</a>
+	{{ if .ArchiveURL }}
+	<span class="puny">
+		<a href="{{ .ArchiveURL }}">(archived)</a>
+	</span>
+	{{else}}
+  <span class="puny">
+    <a href="#" data-saved-id="{{ .ID }}" onclick="archiveItem(this); return false;">(&#8595;)</a>
+  </span>
+	{{end}}
+	<br>
+	<span class="puny">Saved {{ .CreatedAt }} via <a href="//{{ .ItemURL | printDomain }}">{{ .ItemURL | printDomain }}</a></span>
+	</li>
+{{ end }}
+</ul>
+{{ end }}
+
+{{ if $.LoggedIn }}
+<script>
+function archiveItem(element) {
+  const states = [".", "..", "..."];
+  let index = 0;
+
+  const intervalId = setInterval(() => {
+    element.textContent = "(ARCHIVING" + states[index] + ")";
+    index = (index + 1) % states.length;
+  }, 300);
+
+  fetch("/archive/" + element.dataset.savedId, {method: "POST", keepalive: true,})
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(data => {
+      clearInterval(intervalId);
+      element.textContent = "(✓ ARCHIVED)";
+    })
+    .catch(error => {
+      console.error(error);
+      clearInterval(intervalId);
+      element.textContent = "(⚠ ERROR)";
+    });
+}
+</script>
+{{end}}
+
+{{ template "tail" . }}
+{{ end }}

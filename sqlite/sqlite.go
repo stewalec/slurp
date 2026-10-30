@@ -20,6 +20,7 @@ type DB struct {
 }
 
 type SavedItem struct {
+	ID         string
 	ArchiveURL string
 	CreatedAt  time.Time
 	ItemTitle  string
@@ -209,10 +210,33 @@ func (db *DB) GetUserFeedURLs(username string) []string {
 	return urls
 }
 
+func (db *DB) GetUserSavedItem(id string, username string) SavedItem {
+	uid := db.GetUserID(username)
+
+	var si SavedItem
+	err := db.sql.QueryRow(`
+		SELECT id, item_url, item_title, COALESCE(archive_url, '') AS archive_url, created_at
+		FROM saved_item
+		WHERE user_id = ? AND id = ?`,
+		uid, id,
+	).Scan(
+		&si.ID,
+		&si.ItemURL,
+		&si.ItemTitle,
+		&si.ArchiveURL,
+		&si.CreatedAt,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	return si
+}
+
 func (db *DB) GetUserSavedItems(username string) []SavedItem {
 	uid := db.GetUserID(username)
 
-	rows, err := db.sql.Query(`SELECT item_url, item_title, archive_url, created_at
+	rows, err := db.sql.Query(`SELECT id, item_url, item_title, COALESCE(archive_url, '') AS archive_url, created_at
 				FROM saved_item WHERE user_id = ?
 				ORDER BY created_at DESC`, uid)
 	if err == sql.ErrNoRows {
@@ -226,7 +250,7 @@ func (db *DB) GetUserSavedItems(username string) []SavedItem {
 	var savedItems []SavedItem
 	for rows.Next() {
 		var si SavedItem
-		err = rows.Scan(&si.ItemURL, &si.ItemTitle, &si.ArchiveURL, &si.CreatedAt)
+		err = rows.Scan(&si.ID, &si.ItemURL, &si.ItemTitle, &si.ArchiveURL, &si.CreatedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -268,7 +292,18 @@ func (db *DB) WriteSavedItem(username string, item SavedItem) error {
 
 	_, err := db.sql.Exec(`
 	INSERT INTO saved_item(user_id, item_url, item_title, archive_url)
-	VALUES(?, ?, ?, ?)`, uid, item.ItemURL, item.ItemTitle, item.ArchiveURL)
+	VALUES(?, ?, ?, NULLIF(?, ''))`, uid, item.ItemURL, item.ItemTitle, item.ArchiveURL)
+
+	return err
+}
+
+func (db *DB) WriteArchivedItem(username string, item SavedItem) error {
+	uid := db.GetUserID(username)
+
+	_, err := db.sql.Exec(`
+	UPDATE saved_item
+	SET archive_url = ?
+	WHERE id = ? AND user_id = ?`, item.ArchiveURL, item.ID, uid)
 
 	return err
 }

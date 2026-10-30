@@ -161,17 +161,7 @@ func (s *Site) saveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := wayback.Client{}
-
-	archiveURL, err := c.Archive(context.Background(), decodedURL)
-	if err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "error capturing archive!!")
-		return
-	}
-
 	err = s.db.WriteSavedItem(username, sqlite.SavedItem{
-		ArchiveURL: archiveURL,
 		ItemTitle:  item.Title,
 		ItemURL:    item.Link,
 	})
@@ -180,6 +170,37 @@ func (s *Site) saveHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "error!!!")
 		return
 	}
+}
+
+func (s *Site) archiveHandler(w http.ResponseWriter, r *http.Request) {
+	if !s.loggedIn(r) {
+		s.renderErr(w, "", http.StatusUnauthorized)
+		return
+	}
+
+	username := s.username(r)
+	id := r.PathValue("id")
+	item := s.db.GetUserSavedItem(id, username)
+
+	c := wayback.Client{}
+
+	archiveURL, err := c.Archive(context.Background(), item.ItemURL)
+	if err != nil {
+		log.Println(err)
+		fmt.Fprintf(w, "error capturing archive!!")
+		return
+	}
+
+	err = s.db.WriteArchivedItem(username, sqlite.SavedItem{
+		ID:         id,
+		ArchiveURL: archiveURL,
+	})
+	if err != nil {
+		log.Println(err)
+		fmt.Fprintf(w, "error!!!")
+		return
+	}
+	log.Printf("archive: %s successfully archived to %s\n", item.ItemURL, archiveURL)
 }
 
 func (s *Site) userHandler(w http.ResponseWriter, r *http.Request) {
@@ -223,7 +244,7 @@ func (s *Site) userHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "user", data)
 }
 
-func (s *Site) userSavesHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) userSavedHandler(w http.ResponseWriter, r *http.Request) {
 	if !s.loggedIn(r) {
 		s.renderErr(w, "", http.StatusUnauthorized)
 		return
@@ -231,7 +252,7 @@ func (s *Site) userSavesHandler(w http.ResponseWriter, r *http.Request) {
 
 	username := s.username(r)
 	saves := s.db.GetUserSavedItems(username)
-	s.renderPage(w, r, "archive", saves)
+	s.renderPage(w, r, "saved", saves)
 }
 
 func (s *Site) settingsHandler(w http.ResponseWriter, r *http.Request) {
@@ -517,6 +538,12 @@ func (s *Site) renderPage(w http.ResponseWriter, r *http.Request, page string, d
 	tmplFiles := filepath.Join("files", "*.tmpl.html")
 	tmpl := template.Must(template.New("whatever").Funcs(funcMap).ParseGlob(tmplFiles))
 
+	var title string = page + " - slurp"
+	var username string = s.username(r)
+	if page == "user" {
+		title = username + "'s feed - slurp"
+	}
+
 	// fields on this anon struct are generally
 	// pulled out of Data when they're globally required
 	// callers should jam anything they want into Data
@@ -524,11 +551,10 @@ func (s *Site) renderPage(w http.ResponseWriter, r *http.Request, page string, d
 		Title      string
 		Username   string
 		LoggedIn   bool
-		CutePhrase string
 		Data       any
 	}{
-		Title:      "Slurp - " + page,
-		Username:   s.username(r),
+		Title:      title,
+		Username:   username,
 		LoggedIn:   s.loggedIn(r),
 		Data:       data,
 	}
@@ -626,10 +652,6 @@ func (s *Site) settingsRedirectHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Site) settingsSubmitRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/feeds/submit", http.StatusMovedPermanently)
-}
-
-func (s *Site) savesRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/archive", http.StatusMovedPermanently)
 }
 
 func (s *Site) readHandler(w http.ResponseWriter, r *http.Request) {

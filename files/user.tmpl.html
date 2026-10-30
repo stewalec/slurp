@@ -15,11 +15,12 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 <fieldset style="margin-top:1rem;">
   <legend>Filter by Feed</legend>
   <select onchange="filterFeed(this.value)">
-  <option value="" selected>All</option>
-  <optgroup label="----------"></optgroup>
-  {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
+    <option value="" selected>All</option>
+    <optgroup label="----------"></optgroup>
+    {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
   </select>
 </fieldset>
+
 <ul class="items">
 {{ range .Data.Items }}
 	<li{{ if and $.LoggedIn (index $.Data.ReadItems .Link) }} class="item read"{{ else }} class="item"{{ end }}
@@ -32,7 +33,6 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 		Published <span title="{{ .Date }}">{{ .Date | timeSince }}</span> via
 		<a href="//{{ .Link | printDomain }}">{{ .FeedName }}</a>
 		{{ if $.LoggedIn }}
-    | <a href="#">SHARE</a>
 		| <a href="#"
         data-save-url="/save/{{ .Link | escapeURL }}"
         onclick="saveItem(this); return false;">
@@ -47,16 +47,7 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 {{ if $.LoggedIn }}
 <script>
 function saveItem(element) {
-  const url = element.dataset.saveUrl;
-  const states = [".", "..", "..."];
-  let index = 0;
-
-  const intervalId = setInterval(() => {
-    element.textContent = "ARCHIVING" + states[index];
-    index = (index + 1) % states.length;
-  }, 300);
-
-  fetch(url)
+  fetch(element.dataset.saveUrl, {method: "POST", keepalive: true,})
     .then(response => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -64,13 +55,11 @@ function saveItem(element) {
       return response.text();
     })
     .then(data => {
-      clearInterval(intervalId);
-      element.textContent = "✓ ARCHIVED!";
+      element.textContent = "✓ SAVED";
     })
     .catch(error => {
       console.error(error);
-      clearInterval(intervalId);
-      element.textContent = "⚠ ERROR!";
+      element.textContent = "⚠ ERROR";
     });
 }
 

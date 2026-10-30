@@ -10,7 +10,6 @@ func main() {
 
 	http.HandleFunc("GET /{$}", s.indexHandler)
 	http.HandleFunc("GET /{username}", s.userHandler)
-	http.HandleFunc("GET /archive", s.userSavesHandler)
 	http.HandleFunc("GET /static/{file}", s.staticHandler)
 	http.HandleFunc("GET /stir", s.stirHandler)
 	http.HandleFunc("POST /stir", s.stirHandler)
@@ -21,7 +20,9 @@ func main() {
 	http.HandleFunc("GET /logout", s.logoutHandler)
 	http.HandleFunc("POST /logout", s.logoutHandler)
 	http.HandleFunc("POST /register", s.registerHandler)
-	http.HandleFunc("GET /save/{url}", s.saveHandler)
+	http.HandleFunc("GET /saved", s.userSavedHandler)
+	http.HandleFunc("POST /save/{url}", s.saveHandler)
+	http.HandleFunc("POST /archive/{id}", s.archiveHandler)
 	http.HandleFunc("GET /read/{url}", s.readHandler)
 	http.HandleFunc("POST /read/{url}", s.readHandler)
 	http.HandleFunc("GET /feeds/{url}", s.feedDetailsHandler)
@@ -29,7 +30,6 @@ func main() {
 	// backwards compatibility redirects
 	http.HandleFunc("GET /settings", s.settingsRedirectHandler)
 	http.HandleFunc("POST /settings/submit", s.settingsSubmitRedirectHandler)
-	http.HandleFunc("GET /saves", s.savesRedirectHandler)
 
 	log.Println("main: listening on http://localhost:5544")
 	log.Fatal(http.ListenAndServe(":5544", nil))
