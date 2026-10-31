@@ -44,7 +44,7 @@ type Save struct {
 }
 
 // New returns a fully populated & ready for action Site
-func New() *Site {
+func New(cli bool) *Site {
 	// pragmas:
 	// - journal_mode=WAL: enable write-ahead log for concurrency & perf
 	// - foreign_keys=ON: need foreign keyz
@@ -56,19 +56,26 @@ func New() *Site {
 	// init favicon fetcher
 	faviconFetcher := favicon.NewFaviconFetcher()
 
+	r := &reaper.Reaper{}
+	if !cli {
+		r = reaper.New(db)
+	}
+
 	s := Site{
-		title:          "vore",
-		reaper:         reaper.New(db),
+		title:          "slurp",
+		reaper:         r,
 		db:             db,
 		faviconFetcher: faviconFetcher,
 	}
 
-	// favi fetchy - every day or so
-	go func() {
-		log.Println("favicon: starting favicon fetch for all feed domains")
-		feedURLs := db.GetAllFeedURLs()
-		faviconFetcher.FetchFaviconsForDomains(feedURLs)
-	}()
+	if !cli {
+		// favi fetchy - every day or so
+		go func() {
+			log.Println("favicon: starting favicon fetch for all feed domains")
+			feedURLs := db.GetAllFeedURLs()
+			faviconFetcher.FetchFaviconsForDomains(feedURLs)
+		}()
+	}
 
 	return &s
 }
