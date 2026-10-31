@@ -19,6 +19,10 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
     <optgroup label="----------"></optgroup>
     {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
   </select>
+  <label>
+    <input type="checkbox" id="unsorted">
+    Sort by Unread
+  </label>
 </fieldset>
 
 <ul class="items">

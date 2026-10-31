@@ -37,6 +37,14 @@ body {
   font-size: 0.75rem;
 }
 
+.items .read {
+  order: 0;
+}
+
+body:has(#unsorted:checked) .items .read {
+  order: 1;
+}
+
 p {
   font-family: monospace;
   white-space: pre-wrap;
