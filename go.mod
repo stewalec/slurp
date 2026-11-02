@@ -1,4 +1,4 @@
-module git.j3s.sh/vore
+module github.com/stewalec/slurp
 
 go 1.26.0
 

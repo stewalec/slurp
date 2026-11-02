@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"git.j3s.sh/vore/rss"
-	"git.j3s.sh/vore/sqlite"
+	"github.com/stewalec/slurp/rss"
+	"github.com/stewalec/slurp/sqlite"
 )
 
 type ItemDetails struct {
@@ -19,6 +19,7 @@ type ItemDetails struct {
     Link       string
 	Title      string
     Date       time.Time
+	IsSaved    bool
 }
 
 type Reaper struct {
@@ -40,12 +41,12 @@ func (r *Reaper) fetchFunc() rss.FetchFunc {
 			return nil, err
 		}
 
-		req.Header.Set("User-Agent", "vore: feed fetcher")
+		req.Header.Set("User-Agent", "slurp: feed fetcher")
 
 		fid, exists := r.db.GetFeedIDAndExists(url)
 		if exists {
 			subs := r.db.GetSubscriberCount(url)
-			ua := fmt.Sprintf("Vore feed-id:%d - %d subscribers", fid, subs)
+			ua := fmt.Sprintf("Slurp feed-id:%d - %d subscribers", fid, subs)
 			req.Header.Set("User-Agent", ua)
 		}
 
@@ -188,7 +189,7 @@ func (r *Reaper) SortFeeds(f []*rss.Feed) {
 	})
 }
 
-func (r *Reaper) SortFeedItemsByDate(feeds []*rss.Feed) []*ItemDetails {
+func (r *Reaper) SortFeedItemsByDate(username string, feeds []*rss.Feed) []*ItemDetails {
 	var posts []*ItemDetails
 	for _, f := range feeds {
 		for _, i := range f.Items {
@@ -197,6 +198,7 @@ func (r *Reaper) SortFeedItemsByDate(feeds []*rss.Feed) []*ItemDetails {
 				Link: i.Link,
 				Title: i.Title,
 				Date: i.Date,
+				IsSaved: r.db.CheckUserSavedItemExists(username, i.Link),
 			})
 		}
 	}

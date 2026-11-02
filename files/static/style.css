@@ -41,7 +41,7 @@ body {
   order: 0;
 }
 
-body:has(#unsorted:checked) .items .read {
+body:has(#sorted:checked) .items .read {
   order: 1;
 }
 

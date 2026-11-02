@@ -20,10 +20,10 @@ func main() {
 
 	switch cmd {
 	case "serve":
-		s := New(false) // no cli mode
+		s := New(false) // no commands to be run via cli
 		runServer(s)
 	case "add":
-		s := New(true) // cli mode to skip favicon/reaper
+		s := New(true) // run commands via cli so skip favicon/reaper
 		createUser(s, os.Args[2:])
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command %q\nusage: slurp [serve|add]\n", cmd)
@@ -39,7 +39,6 @@ func runServer(s *Site) {
 	http.HandleFunc("POST /stir", s.stirHandler)
 	http.HandleFunc("GET /feeds", s.settingsHandler)
 	http.HandleFunc("POST /feeds/submit", s.settingsSubmitHandler)
-	http.HandleFunc("GET /login", s.loginHandler)
 	http.HandleFunc("POST /login", s.loginHandler)
 	http.HandleFunc("GET /logout", s.logoutHandler)
 	http.HandleFunc("POST /logout", s.logoutHandler)

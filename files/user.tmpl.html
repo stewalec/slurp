@@ -20,7 +20,7 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
     {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
   </select>
   <label>
-    <input type="checkbox" id="unsorted">
+    <input type="checkbox" id="sorted" checked>
     Sort by Unread
   </label>
 </fieldset>
@@ -37,11 +37,15 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 		Published <span title="{{ .Date }}">{{ .Date | timeSince }}</span> via
 		<a href="//{{ .Link | printDomain }}">{{ .FeedName }}</a>
 		{{ if $.LoggedIn }}
+    {{ if .IsSaved }}
+    | <a href="/saved" style="color:#DD4B4C;">SAVED</a>
+    {{ else }}
 		| <a href="#"
         data-save-url="/save/{{ .Link | escapeURL }}"
         onclick="saveItem(this); return false;">
         SAVE</a>
 		{{ end }}
+    {{ end }}
 	</span>
 	</li>
 {{ end }}

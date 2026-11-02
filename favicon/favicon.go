@@ -136,7 +136,7 @@ func (f *FaviconFetcher) fetchFaviconDataURL(faviconURL string) string {
 		return ""
 	}
 
-	req.Header.Set("User-Agent", "vore: favicon fetcher")
+	req.Header.Set("User-Agent", "slurp: favicon fetcher")
 
 	resp, err := f.client.Do(req)
 	if err != nil {
@@ -193,7 +193,7 @@ func (f *FaviconFetcher) discoverFaviconFromHTML(baseURL string) []string {
 		return []string{}
 	}
 
-	req.Header.Set("User-Agent", "vore: favicon fetcher")
+	req.Header.Set("User-Agent", "slurp: favicon fetcher")
 
 	resp, err := f.client.Do(req)
 	if err != nil {

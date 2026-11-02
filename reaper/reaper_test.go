@@ -3,8 +3,8 @@ package reaper
 import (
 	"testing"
 
-	"git.j3s.sh/vore/rss"
-	"git.j3s.sh/vore/sqlite"
+	"github.com/stewalec/slurp/rss"
+	"github.com/stewalec/slurp/sqlite"
 )
 
 func TestHasFeed(t *testing.T) {

@@ -15,12 +15,12 @@ import (
 	"strings"
 	"time"
 
-	"git.j3s.sh/vore/favicon"
-	"git.j3s.sh/vore/lib"
-	"git.j3s.sh/vore/reaper"
-	"git.j3s.sh/vore/rss"
-	"git.j3s.sh/vore/sqlite"
-	"git.j3s.sh/vore/wayback"
+	"github.com/stewalec/slurp/favicon"
+	"github.com/stewalec/slurp/lib"
+	"github.com/stewalec/slurp/reaper"
+	"github.com/stewalec/slurp/rss"
+	"github.com/stewalec/slurp/sqlite"
+	"github.com/stewalec/slurp/wayback"
 	"golang.org/x/crypto/bcrypt"
 	nethtml "golang.org/x/net/html"
 )
@@ -51,7 +51,7 @@ func New(cli bool) *Site {
 	// - busy_timeout=5000: locky locky 5 secs
 	// - synchronous=NORMAL: "The synchronous=NORMAL setting is a good choice for most applications running in WAL mode."
 	// - cache_size=-64000: 64MB ram for db cache (yum yum more perf)
-	db := sqlite.New("vore.db?_pragma=journal_mode(WAL)&_pragma=foreign_keys(ON)&_pragma=busy_timeout(5000)&_pragma=synchronous(NORMAL)&_pragma=cache_size(-64000)")
+	db := sqlite.New("slurp.db?_pragma=journal_mode(WAL)&_pragma=foreign_keys(ON)&_pragma=busy_timeout(5000)&_pragma=synchronous(NORMAL)&_pragma=cache_size(-64000)")
 
 	// init favicon fetcher
 	faviconFetcher := favicon.NewFaviconFetcher()
@@ -99,25 +99,15 @@ func (s *Site) indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Site) loginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		if s.loggedIn(r) {
-			username := s.username(r)
-			http.Redirect(w, r, "/"+username, http.StatusSeeOther)
-		} else {
-			s.renderPage(w, r, "login", nil)
-		}
-	}
-	if r.Method == "POST" {
-		username := r.FormValue("username")
-		password := r.FormValue("password")
+	username := r.FormValue("username")
+	password := r.FormValue("password")
 
-		err := s.login(w, username, password)
-		if err != nil {
-			s.renderErr(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-		http.Redirect(w, r, "/"+username, http.StatusSeeOther)
+	err := s.login(w, username, password)
+	if err != nil {
+		s.renderErr(w, err.Error(), http.StatusUnauthorized)
+		return
 	}
+	http.Redirect(w, r, "/"+username, http.StatusSeeOther)
 }
 
 // TODO: make this take a POST only in accordance w/ some spec
@@ -234,7 +224,7 @@ func (s *Site) userHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := s.reaper.TrimFuturePosts(s.reaper.SortFeedItemsByDate(s.reaper.GetUserFeeds(username)))
+	items := s.reaper.TrimFuturePosts(s.reaper.SortFeedItemsByDate(username, s.reaper.GetUserFeeds(username)))
 
 	var readItems map[string]bool
 	if s.loggedIn(r) {
@@ -657,13 +647,11 @@ func (s *Site) renderErr(w http.ResponseWriter, error string, code int) {
 	var prefix string
 	switch code {
 	case http.StatusBadRequest:
-		prefix = "400 bad request\n"
+		prefix = "400 Bad Request\n"
 	case http.StatusUnauthorized:
-		prefix = "401 unauthorized\n"
+		prefix = "401 Unauthorized\n"
 	case http.StatusInternalServerError:
-		prefix = "(╥﹏╥) oopsie woopsie, uwu\n"
-		prefix += "we made a fucky wucky (╥﹏╥)\n\n"
-		prefix += "500 internal server error\n"
+		prefix = "500 Internal Server Error\n"
 	}
 	log.Println(prefix + error)
 	http.Error(w, prefix+error, code)
