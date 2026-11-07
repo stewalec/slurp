@@ -1,4 +1,5 @@
 slurp
 slurp.db*
 go_test.db
-
+.env
+run.sh
