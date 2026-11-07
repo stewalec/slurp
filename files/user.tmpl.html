@@ -12,6 +12,7 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 </p>
 {{ end }}
 {{ else }}
+{{ if $.LoggedIn }}
 <fieldset style="margin-top:1rem;">
   <legend>Filter/Sort Options</legend>
   <select onchange="filterFeed(this.value)">
@@ -19,11 +20,12 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
     <optgroup label="----------"></optgroup>
     {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
   </select>
-  <label>
+  <label style="display:block;">
     <input type="checkbox" id="sorted" checked>
     Sort by Unread
   </label>
 </fieldset>
+{{ end }}
 
 <ul class="items">
 {{ range .Data.Items }}
@@ -37,14 +39,10 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 		Published <span title="{{ .Date }}">{{ .Date | timeSince }}</span> via
 		<a href="//{{ .Link | printDomain }}">{{ .FeedName }}</a>
 		{{ if $.LoggedIn }}
-    {{ if .IsSaved }}
-    | <a href="/saved" style="color:#DD4B4C;">SAVED</a>
-    {{ else }}
 		| <a href="#"
         data-save-url="/save/{{ .Link | escapeURL }}"
         onclick="saveItem(this); return false;">
         SAVE</a>
-		{{ end }}
     {{ end }}
 	</span>
 	</li>

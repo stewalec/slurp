@@ -19,7 +19,6 @@ type ItemDetails struct {
     Link       string
 	Title      string
     Date       time.Time
-	IsSaved    bool
 }
 
 type Reaper struct {
@@ -189,7 +188,7 @@ func (r *Reaper) SortFeeds(f []*rss.Feed) {
 	})
 }
 
-func (r *Reaper) SortFeedItemsByDate(username string, feeds []*rss.Feed) []*ItemDetails {
+func (r *Reaper) SortFeedItemsByDate(feeds []*rss.Feed) []*ItemDetails {
 	var posts []*ItemDetails
 	for _, f := range feeds {
 		for _, i := range f.Items {
@@ -198,7 +197,6 @@ func (r *Reaper) SortFeedItemsByDate(username string, feeds []*rss.Feed) []*Item
 				Link: i.Link,
 				Title: i.Title,
 				Date: i.Date,
-				IsSaved: r.db.CheckUserSavedItemExists(username, i.Link),
 			})
 		}
 	}

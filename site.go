@@ -224,13 +224,16 @@ func (s *Site) userHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := s.reaper.TrimFuturePosts(s.reaper.SortFeedItemsByDate(username, s.reaper.GetUserFeeds(username)))
+	// All RSS items
+	items := s.reaper.TrimFuturePosts(s.reaper.SortFeedItemsByDate(s.reaper.GetUserFeeds(username)))
 
+	// Read RSS items
 	var readItems map[string]bool
 	if s.loggedIn(r) {
 		readItems = s.db.GetUserReadItems(s.username(r))
 	}
 
+	// Feed names derived from RSS items
 	seen := make(map[string]bool)
 	for _, item := range items {
 		seen[item.FeedName] = true

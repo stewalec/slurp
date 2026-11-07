@@ -233,25 +233,6 @@ func (db *DB) GetUserSavedItem(id string, username string) SavedItem {
 	return si
 }
 
-func (db *DB) CheckUserSavedItemExists(username string, url string) bool {
-	uid := db.GetUserID(username)
-
-	var exists bool
-	err := db.sql.QueryRow(`
-        SELECT EXISTS(
-            SELECT 1 FROM saved_item
-            WHERE user_id = ? AND item_url = ?
-        )`,
-        uid, url,
-    ).Scan(&exists)
-	if err != nil {
-		log.Printf("SavedItemExists: %v", err)
-        return false
-	}
-	
-	return exists
-}
-
 func (db *DB) GetUserSavedItems(username string) []SavedItem {
 	uid := db.GetUserID(username)
 
