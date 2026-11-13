@@ -34,7 +34,7 @@ Slurp intends to be as minimal and simple as vore, but with a few changes:
 ## Building & Running
 
 ```
-git clone https://github.com/stewalec/slurp
+git clone --depth=1 https://git.emohruo.cloud/git/slurp/slurp
 cd slurp
 go build
 ./slurp
