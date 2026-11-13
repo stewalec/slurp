@@ -6,7 +6,7 @@
 <form method="POST" action="/feeds/submit">
 <fieldset>
 <legend>Subscribed to <b>{{ len .Data }}</b> feeds</legend>
-<textarea name="submit" rows="10" cols="57">
+<textarea name="submit" rows="20">
 {{ range .Data -}}
 {{ .UpdateURL }}
 {{ end -}}
@@ -19,7 +19,7 @@
 {{ if gt $length 0 }}
 <p>
 {{ range .Data -}}
-<a href="/feeds/{{ .UpdateURL | escapeURL }}">{{ .UpdateURL }}</a>
+<a href="/feeds/details?url={{ .UpdateURL | escapeURL }}">{{ .UpdateURL }}</a>
 {{ end -}}
 </p>
 {{ end }}

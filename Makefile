@@ -11,7 +11,7 @@ RSYNC       := rsync -azvP --delete --include='$(BINARY_NAME)' --include='run.sh
 build:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(BINARY_NAME)
 
-deploy: build script
+deploy: clean build script
 	$(RSYNC) ./ $(SSH_HOST):$(REMOTE_PATH)/
 	$(MAKE) restart
 

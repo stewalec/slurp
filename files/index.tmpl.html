@@ -1,20 +1,17 @@
 {{ define "index" }}
 {{ template "head" . }}
 {{ template "nav" . }}
-<p style="text-align: center;">
-<a href="https://github.com/stewalec/slurp">slurp</a> is a minimal, web-based RSS/Atom feed reader
-</p>
-<form method="POST" action="/login">
-	<fieldset>
-		<legend>LOGIN</legend>
-		<label for="username">Username:</label>
-		<input type="text" name="username" size="42" required>
-		<br>
-		<label for="password">Password:</label>
-		<input type="password" name="password" size="42" required>
-		<br>
-		<button type="submit">Login</button>
-	</fieldset>
+<p style="text-align: center;"><a href="https://github.com/stewalec/slurp">slurp</a> is a minimal, web-based RSS/Atom feed reader</p>
+<form class="auth-form" method="POST" action="/login">
+	<div class="field">
+		<label for="username">Username</label>
+		<input type="text" name="username" required>
+	</div>
+	<div class="field">
+		<label for="password">Password</label>
+		<input type="password" name="password" required>
+	</div>
+	<button type="submit">Login</button>
 </form>
 {{ template "tail" . }}
 {{ end }}

@@ -92,7 +92,7 @@ func (s *Site) staticHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Site) indexHandler(w http.ResponseWriter, r *http.Request) {
 	if s.loggedIn(r) {
 		username := s.username(r)
-		http.Redirect(w, r, "/"+username, http.StatusSeeOther)
+		http.Redirect(w, r, "/user/"+username, http.StatusSeeOther)
 		return
 	}
 	s.renderPage(w, r, "index", nil)
@@ -107,7 +107,7 @@ func (s *Site) loginHandler(w http.ResponseWriter, r *http.Request) {
 		s.renderErr(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	http.Redirect(w, r, "/"+username, http.StatusSeeOther)
+	http.Redirect(w, r, "/user/"+username, http.StatusSeeOther)
 }
 
 // TODO: make this take a POST only in accordance w/ some spec
@@ -119,55 +119,18 @@ func (s *Site) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (s *Site) registerHandler(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	err := s.register(username, password)
-	if err != nil {
-		s.renderErr(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = s.login(w, username, password)
-	if err != nil {
-		s.renderErr(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
 // saveHandler is an endpoint that takes a url, archives it
 // via archive.org, and then saves it to the user's account.
-func (s *Site) saveHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) savedAddHandler(w http.ResponseWriter, r *http.Request) {
 	if !s.loggedIn(r) {
 		s.renderErr(w, "", http.StatusUnauthorized)
 		return
 	}
 
-	if r.Method == "DELETE" {
-		username := s.username(r)
-		id := r.PathValue("id")
-
-		err := s.db.DeleteUserSavedItem(id, username)
-		if err != nil {
-			log.Println(err)
-			fmt.Fprintf(w, "error!!!")
-			return
-		}
-
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
 	username := s.username(r)
-	encodedURL := r.PathValue("url")
-	decodedURL, err := url.QueryUnescape(encodedURL)
-	if err != nil {
-		e := fmt.Sprintf("failed to decode URL '%s' %s", encodedURL, err)
-		s.renderErr(w, e, http.StatusBadRequest)
-		return
-	}
+	url := r.PostFormValue("url")
 
-	item, err := s.reaper.GetItem(decodedURL)
+	item, err := s.reaper.GetItem(url)
 	if err != nil {
 		fmt.Fprintf(w, "error!")
 		return
@@ -184,14 +147,33 @@ func (s *Site) saveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Site) archiveHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) savedDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	if !s.loggedIn(r) {
 		s.renderErr(w, "", http.StatusUnauthorized)
 		return
 	}
 
 	username := s.username(r)
-	id := r.PathValue("id")
+	id := r.PostFormValue("id")
+
+	err := s.db.DeleteUserSavedItem(id, username)
+	if err != nil {
+		log.Println(err)
+		fmt.Fprintf(w, "error!!!")
+		return
+	}
+
+	http.Redirect(w, r, "/saved", http.StatusSeeOther)
+}
+
+func (s *Site) savedArchiveHandler(w http.ResponseWriter, r *http.Request) {
+	if !s.loggedIn(r) {
+		s.renderErr(w, "", http.StatusUnauthorized)
+		return
+	}
+
+	username := s.username(r)
+	id := r.PostFormValue("id")
 	item := s.db.GetUserSavedItem(id, username)
 
 	c := wayback.Client{}
@@ -271,7 +253,7 @@ func (s *Site) userSavedHandler(w http.ResponseWriter, r *http.Request) {
 	s.renderPage(w, r, "saved", saves)
 }
 
-func (s *Site) settingsHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) feedsHandler(w http.ResponseWriter, r *http.Request) {
 	if !s.loggedIn(r) {
 		s.renderErr(w, "", http.StatusUnauthorized)
 		return
@@ -285,7 +267,7 @@ func (s *Site) settingsHandler(w http.ResponseWriter, r *http.Request) {
 // TODO: show diff before submission (like tf plan)
 // check if feed exists in db already?
 // validate that title exists
-func (s *Site) settingsSubmitHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) feedsSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	if !s.loggedIn(r) {
 		s.renderErr(w, "", http.StatusUnauthorized)
 		return
@@ -338,8 +320,8 @@ func (s *Site) settingsSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/feeds", http.StatusSeeOther)
 }
 
-func (s *Site) feedDetailsHandler(w http.ResponseWriter, r *http.Request) {
-	encodedURL := r.PathValue("url")
+func (s *Site) feedsDetailsHandler(w http.ResponseWriter, r *http.Request) {
+	encodedURL := r.URL.Query().Get("url")
 	decodedURL, err := url.QueryUnescape(encodedURL)
 	if err != nil {
 		e := fmt.Sprintf("failed to decode URL '%s' %s", encodedURL, err)
@@ -554,11 +536,7 @@ func (s *Site) renderPage(w http.ResponseWriter, r *http.Request, page string, d
 	tmplFiles := filepath.Join("files", "*.tmpl.html")
 	tmpl := template.Must(template.New("whatever").Funcs(funcMap).ParseGlob(tmplFiles))
 
-	var title string = page + " - slurp"
 	var username string = s.username(r)
-	if page == "user" {
-		title = username + "'s feed - slurp"
-	}
 
 	// fields on this anon struct are generally
 	// pulled out of Data when they're globally required
@@ -569,7 +547,7 @@ func (s *Site) renderPage(w http.ResponseWriter, r *http.Request, page string, d
 		LoggedIn   bool
 		Data       any
 	}{
-		Title:      title,
+		Title:      page,
 		Username:   username,
 		LoggedIn:   s.loggedIn(r),
 		Data:       data,
@@ -660,14 +638,6 @@ func (s *Site) renderErr(w http.ResponseWriter, error string, code int) {
 	http.Error(w, prefix+error, code)
 }
 
-func (s *Site) settingsRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/feeds", http.StatusMovedPermanently)
-}
-
-func (s *Site) settingsSubmitRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/feeds/submit", http.StatusMovedPermanently)
-}
-
 func (s *Site) readHandler(w http.ResponseWriter, r *http.Request) {
 	if !s.loggedIn(r) {
 		s.renderErr(w, "", http.StatusUnauthorized)
@@ -675,21 +645,12 @@ func (s *Site) readHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	username := s.username(r)
-	encodedURL := r.PathValue("url")
-	decodedURL, err := url.QueryUnescape(encodedURL)
-	if err != nil {
-		s.renderErr(w, "invalid url", http.StatusBadRequest)
-		return
-	}
+	url := r.PostFormValue("url")
 
-	err = s.db.MarkItemRead(username, decodedURL)
+	err := s.db.MarkItemRead(username, url)
 	if err != nil {
 		log.Println("error marking item read:", err)
 	}
 
-	if r.Method == "GET" {
-		http.Redirect(w, r, decodedURL, http.StatusSeeOther)
-	} else {
-		w.WriteHeader(http.StatusNoContent)
-	}
+	w.WriteHeader(http.StatusNoContent)
 }

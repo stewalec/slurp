@@ -11,6 +11,7 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
+  padding: 0 1rem;
 }
 
 .items {
@@ -48,6 +49,58 @@ body:has(#sorted:checked) .items .read {
 p {
   font-family: monospace;
   white-space: pre-wrap;
+}
+
+.link-button {
+  margin-top: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0000FF;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+[id^="confirm-delete-"] {
+  padding: 1.5rem;
+  border: none;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.3);
+}
+
+[id^="confirm-delete-"]::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+[id^="confirm-delete-"] form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+[id^="confirm-delete-"] button {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+body:has(:popover-open) {
+  overflow: hidden;
+}
+
+button {
+  margin-top: 1rem;
+}
+
+fieldset textarea,
+fieldset select,
+fieldset input:not([type="checkbox"]) {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+footer {
+  text-align: center;
+  margin: 1em 0;
 }
 
 nav {
@@ -107,6 +160,25 @@ nav .right {
   display: inline-flex;
 }
 
+.auth-form {
+  padding: 0.5rem;
+  border: 1px solid;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field > label {
+  margin-bottom: 0.25em;
+}
+
+.field > * {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #1c1c1c;
@@ -117,7 +189,7 @@ nav .right {
     color: #d4d4d4;
   }
 
-  a {
+  a, .link-button {
     color: #d4d4d4;
   }
 
@@ -144,5 +216,9 @@ nav .right {
 
   ul li.read a:visited {
     color: #B894D1;
+  }
+
+  [id^="confirm-delete-"] p {
+    color: inherit;
   }
 }

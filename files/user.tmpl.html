@@ -13,25 +13,30 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 {{ end }}
 {{ else }}
 {{ if $.LoggedIn }}
-<fieldset style="margin-top:1rem;">
-  <legend>Filter/Sort Options</legend>
-  <select onchange="filterFeed(this.value)">
-    <option value="" selected>All</option>
-    <optgroup label="----------"></optgroup>
-    {{ range .Data.Feeds }}<option value="{{.}}">{{.}}</option>{{ end }}
-  </select>
-  <label style="display:block;">
-    <input type="checkbox" id="sorted" checked>
-    Sort by Unread
-  </label>
-</fieldset>
+  <details style="margin-top:1rem;">
+    <summary>Filter/Sort</summary>
+    <fieldset style="margin-top:1rem;">
+      <legend>Feeds</legend>
+      <select onchange="filterFeed(this.value)">
+        <option value="" selected>All</option>
+        <optgroup label="----------"></optgroup>
+        {{ range .Data.Feeds -}}
+        <option value="{{.}}">{{.}}</option>
+        {{ end -}}
+      </select>
+      <br>
+      <br>
+      <label>Sort by Unread:</label>
+      <input type="checkbox" id="sorted">
+    </fieldset>
+  </details>
 {{ end }}
 
 <ul class="items">
 {{ range .Data.Items }}
 	<li{{ if and $.LoggedIn (index $.Data.ReadItems .Link) }} class="item read"{{ else }} class="item"{{ end }}
-    {{ if $.LoggedIn }}data-read-url="/read/{{ .Link | escapeURL }}" data-feed="{{ .FeedName }}"{{ end }}>
-	<a href="{{ if $.LoggedIn }}/read/{{ .Link | escapeURL }}{{ else }}{{ .Link }}{{ end }}">
+    {{ if $.LoggedIn }}data-feed="{{ .FeedName }}"{{ end }}>
+	<a href="{{ .Link }}" {{ if $.LoggedIn }}data-read-url="{{ .Link }}" onclick="clickRead(this)"{{ end }}>
 		{{ .Link | faviconForURL }}{{ if .Title }} {{ .Title }} {{ else }} (empty title) {{ end }}
 	</a>
 	<br>
@@ -40,7 +45,7 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 		<a href="//{{ .Link | printDomain }}">{{ .FeedName }}</a>
 		{{ if $.LoggedIn }}
 		| <a href="#"
-        data-save-url="/save/{{ .Link | escapeURL }}"
+        data-save-url="{{ .Link }}"
         onclick="saveItem(this); return false;">
         SAVE</a>
     {{ end }}
@@ -53,7 +58,10 @@ Go to <a href="/feeds">/feeds</a> to add your first feed!
 {{ if $.LoggedIn }}
 <script>
 function saveItem(element) {
-  fetch(element.dataset.saveUrl, {method: "POST", keepalive: true,})
+  const form = new FormData();
+  form.append("url", element.dataset.saveUrl);
+
+  fetch("/saved/add", {method: "POST", keepalive: true, body: form})
     .then(response => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -76,39 +84,34 @@ function filterFeed(feed) {
   document.querySelector('.items').scrollTop = 0;
 }
 
-function markRead(element) {
-  if (element.hidden) return;
-  if (element.classList.contains("read")) return;
+function clickRead(element) {
+  const form = new FormData();
+  form.append("url", element.dataset.readUrl);
+  navigator.sendBeacon("/read", form);
+}
+
+function scrollRead(element) {
+  if (element.hidden || element.classList.contains("read")) return;
   element.classList.add("read");
 
-  fetch(element.dataset.readUrl, {method: "POST", keepalive: true,})
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.text();
-    })
-    .catch(error => {
-      console.error(error);
-      element.classList.remove("read");
-    });
+  const form = new FormData();
+  form.append("url", element.children[0].dataset.readUrl);
+  navigator.sendBeacon("/read", form);
 }
 
 function check() {
   ticking = false;
   const items = document.querySelector(".items");
-  const fieldsetBottom = fieldset ? Math.max(0, fieldset.getBoundingClientRect().bottom) : 0;
+  const detailsBottom = details ? Math.max(0, details.getBoundingClientRect().bottom) : 0;
   const gap = parseFloat(getComputedStyle(items).marginTop) || 0;
-  const line = fieldsetBottom + gap;
+  const line = detailsBottom + gap;
 
   for (const element of document.querySelectorAll(".item:not(.read)")) {
-    if (!element.dataset.readUrl) continue;
     const r = element.getBoundingClientRect();
-
     if (r.bottom > line && r.top < window.innerHeight) {
       seen.add(element);
     } else if (r.bottom <= line && seen.has(element)) {
-      markRead(element);
+      scrollRead(element);
     }
   }
 }
@@ -123,11 +126,10 @@ function onItemClick(e) {
   if (e.type === "auxclick" && e.button !== 1) return;
   const a = e.target.closest(".item > a");
   const li = a?.parentElement;
-  if (!li?.dataset.readUrl) return;
   li.classList.add("read");
 }
 
-const fieldset = document.querySelector("fieldset");
+const details = document.querySelector("details");
 const seen = new WeakSet();
 let ticking = false;
 
